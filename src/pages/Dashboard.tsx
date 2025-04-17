@@ -2,8 +2,30 @@ import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { sanity } from "../sanityClient";
 import dayjs from "dayjs";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
-const activities = ["Daily Task", "Meeting", "Learning"];
+const activities = [
+  "5000 Steps",
+  "4-6 floors",
+  "Read 10 pages",
+  "Minimum 7hrs of sleep",
+  "Early dinner",
+  "2l of water",
+  "Playtime",
+  "No mobile",
+];
+
+const COLORS = [
+  "#8884d8", "#82ca9d", "#ffc658", "#ff7f50",
+  "#00C49F", "#FFBB28", "#FF8042", "#A28BD4",
+];
 
 const dateRange = Array.from(
   { length: dayjs("2024-06-30").diff(dayjs("2024-04-20"), "day") + 1 },
@@ -35,17 +57,36 @@ export default function Dashboard() {
     );
   };
 
+  const getChartData = () => {
+    return activities.map((activity) => {
+      const total = dateRange.length;
+      const doneCount = data.filter(
+        (d) => d.activity === activity && d.done
+      ).length;
+      const percentage = Math.round((doneCount / total) * 100);
+      return {
+        name: activity,
+        value: percentage,
+      };
+    });
+  };
+
   return (
-    <div className="p-4 overflow-x-auto">
-      <h1 className="text-2xl mb-4">
+    <div className="p-4 overflow-x-auto bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-semibold text-indigo-700 mb-6">
         {isAdmin ? "Admin View" : `Welcome, ${username}`}
       </h1>
-      <table className="min-w-[1500px] border">
+
+      {/* Table */}
+      <table className="min-w-[1500px] border mb-12">
         <thead>
           <tr>
             <th className="border p-2">Activity</th>
             {dateRange.map((date) => (
-              <th key={date} className="border p-2 text-xs">
+              <th
+                key={date}
+                className="border p-2 text-xs sticky top-0 bg-white shadow z-10"
+              >
                 {date}
               </th>
             ))}
@@ -53,8 +94,8 @@ export default function Dashboard() {
         </thead>
         <tbody>
           {activities.map((activity) => (
-            <tr key={activity}>
-              <td className="border p-2">{activity}</td>
+            <tr key={activity} className="hover:bg-indigo-50 transition">
+              <td className="border p-2 font-medium">{activity}</td>
               {dateRange.map((date) => {
                 const log = getLog(date, activity, username);
                 return (
@@ -100,22 +141,17 @@ export default function Dashboard() {
                       }}
                     />
                     <input
-                      className="text-xs block w-full mt-1"
+                      className="text-xs block w-full mt-1 px-1 py-0.5 border rounded shadow-inner"
                       type="text"
                       defaultValue={log?.note || ""}
                       disabled={isAdmin}
                       onBlur={async (e) => {
                         const note = e.target.value;
                         if (log) {
-                          await sanity
-                            .patch(log._id)
-                            .set({ note })
-                            .commit();
+                          await sanity.patch(log._id).set({ note }).commit();
                           setData((prev) =>
                             prev.map((item) =>
-                              item._id === log._id
-                                ? { ...item, note }
-                                : item
+                              item._id === log._id ? { ...item, note } : item
                             )
                           );
                         }
@@ -128,6 +164,30 @@ export default function Dashboard() {
           ))}
         </tbody>
       </table>
+
+      {/* Pie Chart */}
+      <div className="mt-12">
+        <h2 className="text-xl font-semibold mb-4 text-center">Progress Summary</h2>
+        <ResponsiveContainer width="100%" height={400}>
+          <PieChart>
+            <Pie
+              data={getChartData()}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={120}
+              label
+            >
+              {getChartData().map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
