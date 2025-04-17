@@ -23,8 +23,14 @@ const activities = [
 ];
 
 const COLORS = [
-  "#8884d8", "#82ca9d", "#ffc658", "#ff7f50",
-  "#00C49F", "#FFBB28", "#FF8042", "#A28BD4",
+  "#8884d8",
+  "#82ca9d",
+  "#ffc658",
+  "#ff7f50",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#A28BD4",
 ];
 
 const dateRange = Array.from(
@@ -36,14 +42,13 @@ export default function Dashboard() {
   const { state } = useLocation();
   const { username, isAdmin } = state;
   const [data, setData] = useState<any[]>([]);
-
   useEffect(() => {
     const fetchData = async () => {
       const userFilter = isAdmin ? "" : `user->username == "${username}" &&`;
       const query = `*[_type == "activityLog" && ${userFilter} date >= "2024-04-20" && date <= "2024-06-30"]{
         _id, date, activity, done, note, user-> {username}
       }`;
-      const logs = await sanity.fetch(query);
+      const logs = await (sanity as any).fetch(query, { username });
       setData(logs);
     };
 
@@ -107,10 +112,11 @@ export default function Dashboard() {
                       onChange={async (e) => {
                         const checked = e.target.checked;
                         if (log) {
-                          await sanity
+                          await (sanity as any)
                             .patch(log._id)
                             .set({ done: checked })
                             .commit();
+
                           setData((prev) =>
                             prev.map((item) =>
                               item._id === log._id
@@ -119,10 +125,11 @@ export default function Dashboard() {
                             )
                           );
                         } else {
-                          const userDoc = await sanity.fetch(
+                          const userDoc = await (sanity as any).fetch(
                             `*[_type == "user" && username == "${username}"][0]{_id}`
                           );
-                          const created = await sanity.create({
+
+                          const created = await (sanity as any).create({
                             _type: "activityLog",
                             date,
                             activity,
@@ -133,6 +140,7 @@ export default function Dashboard() {
                               _ref: userDoc._id,
                             },
                           });
+
                           setData((prev) => [
                             ...prev,
                             { ...created, user: { username } },
@@ -148,7 +156,7 @@ export default function Dashboard() {
                       onBlur={async (e) => {
                         const note = e.target.value;
                         if (log) {
-                          await sanity.patch(log._id).set({ note }).commit();
+                          await (sanity as any).patch(log._id).set({ note }).commit();
                           setData((prev) =>
                             prev.map((item) =>
                               item._id === log._id ? { ...item, note } : item
@@ -167,7 +175,9 @@ export default function Dashboard() {
 
       {/* Pie Chart */}
       <div className="mt-12">
-        <h2 className="text-xl font-semibold mb-4 text-center">Progress Summary</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          Progress Summary
+        </h2>
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
@@ -180,7 +190,10 @@ export default function Dashboard() {
               label
             >
               {getChartData().map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip />

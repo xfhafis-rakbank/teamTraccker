@@ -25,23 +25,31 @@ const activities = [
 ];
 
 const COLORS = [
-  "#8884d8", "#82ca9d", "#ffc658", "#ff7f50",
-  "#00C49F", "#FFBB28", "#FF8042", "#A28BD4",
+  "#8884d8",
+  "#82ca9d",
+  "#ffc658",
+  "#ff7f50",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#A28BD4",
 ];
 
 export default function UserProgress() {
   const { username } = useParams();
   const [data, setData] = useState<any[]>([]);
-  const [startDate, setStartDate] = useState<Date>(dayjs("2024-04-20").toDate());
+  const [startDate, setStartDate] = useState<Date>(
+    dayjs("2024-04-20").toDate()
+  );
   const [endDate, setEndDate] = useState<Date>(dayjs("2024-06-30").toDate());
   const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const logs = await sanity.fetch(
+      const logs = await (sanity as any).fetch(
         `*[_type == "activityLog" && user->username == "${username}" && date >= "2024-04-20" && date <= "2024-06-30"]{
-          _id, date, activity, done, note
-        }`
+              _id, date, activity, done, note
+            }`
       );
       setData(logs);
     };
@@ -75,11 +83,17 @@ export default function UserProgress() {
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">From:</label>
-          <DatePicker selected={startDate} onChange={(date) => setStartDate(date!)} />
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date!)}
+          />
         </div>
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">To:</label>
-          <DatePicker selected={endDate} onChange={(date) => setEndDate(date!)} />
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date!)}
+          />
         </div>
       </div>
 
@@ -97,7 +111,10 @@ export default function UserProgress() {
               label
             >
               {getChartData().map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip />
@@ -138,7 +155,9 @@ export default function UserProgress() {
                     <td className="border p-2">{log.activity}</td>
                     <td className="border p-2">
                       {log.done ? (
-                        <span className="text-green-600 font-semibold">✔️ Done</span>
+                        <span className="text-green-600 font-semibold">
+                          ✔️ Done
+                        </span>
                       ) : (
                         <span className="text-gray-500">Not Done</span>
                       )}

@@ -1,9 +1,13 @@
-import { createClient } from '@sanity/client'
+import { createClient, type SanityClient } from '@sanity/client'
 
-export const sanity = createClient({
-  projectId: 'rz4rht5d',     
+// ✅ Explicitly type the client to unlock full type-safe methods
+const sanityClient: SanityClient = createClient({
+  projectId: 'rz4rht5d',
   dataset: 'production',
-  useCdn: false,
   apiVersion: '2023-01-01',
-  token: 'skMowc1awcFOUmtH8JXmPgsJlalSSxRZiWZtqg9WOkReAL92oCkYueSKwKlxx3Q8WmGvBHEUwMR9js2nviZqeTePjbFoWbelUljoJsmK1UztqAPNGECjUTu3rJS2d1y6JWiSLR7DjiAcQNzWGPQkd1gFUruFRdln3jpUgKnq2g6b37YwfmNY', // optional, for authenticated writes
-})
+  useCdn: false,
+  token: 'skMowc1awcFOUmtH8JXmPgsJlalSSxRZiWZtqg9WOkReAL92oCkYueSKwKlxx3Q8WmGvBHEUwMR9js2nviZqeTePjbFoWbelUljoJsmK1UztqAPNGECjUTu3rJS2d1y6JWiSLR7DjiAcQNzWGPQkd1gFUruFRdln3jpUgKnq2g6b37YwfmNY'
+}) as SanityClient
+
+// ✅ No type override needed if you type it above
+export const sanity = sanityClient

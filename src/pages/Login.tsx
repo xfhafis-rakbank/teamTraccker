@@ -12,10 +12,10 @@ export default function Login() {
   const handleLogin = async () => {
     setLoading(true)
     try {
-      const result = await sanity.fetch(
+      const result = await (sanity as any).fetch(
         `*[_type == "user" && username == $username][0]`,
         { username }
-      )
+      );
       if (result) {
         const isAdmin = result.role === 'admin'
         if (isAdmin) {

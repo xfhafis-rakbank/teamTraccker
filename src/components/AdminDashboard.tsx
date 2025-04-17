@@ -8,12 +8,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await sanity.fetch(`*[_type == "user" && role == "member"]{username}`);
+      const query = `*[_type == "user" && role == "member"]{username}`;
+      const res = await (sanity as any).fetch(query);
       setUsers(res);
     };
     fetchUsers();
   }, []);
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-bold mb-6 text-indigo-700">All Team Members</h1>
